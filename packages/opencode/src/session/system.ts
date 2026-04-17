@@ -1,39 +1,24 @@
 import { Context, Effect, Layer } from "effect"
 
-import { InstanceState } from "@/effect/instance-state"
+import { Instance } from "../project/instance"
 
-import PROMPT_ANTHROPIC from "./prompt/anthropic.txt"
-import PROMPT_DEFAULT from "./prompt/default.txt"
-import PROMPT_BEAST from "./prompt/beast.txt"
-import PROMPT_GEMINI from "./prompt/gemini.txt"
-import PROMPT_GPT from "./prompt/gpt.txt"
-import PROMPT_KIMI from "./prompt/kimi.txt"
 
-import PROMPT_CODEX from "./prompt/codex.txt"
-import PROMPT_TRINITY from "./prompt/trinity.txt"
-import type { Provider } from "@/provider/provider"
 import type { Agent } from "@/agent/agent"
+import GIT_WORKFLOW from "./supplemental/git-workflow.txt"
+import GITHUB_CLI from "./supplemental/github-cli.txt"
+import { fromToolIds } from "./tool-prompt-facts"
+import { build } from "./system-prompt-builder"
 import { Permission } from "@/permission"
 import { Skill } from "@/skill"
 
-export function provider(model: Provider.Model) {
-  if (model.api.id.includes("gpt-4") || model.api.id.includes("o1") || model.api.id.includes("o3"))
-    return [PROMPT_BEAST]
-  if (model.api.id.includes("gpt")) {
-    if (model.api.id.includes("codex")) {
-      return [PROMPT_CODEX]
-    }
-    return [PROMPT_GPT]
-  }
-  if (model.api.id.includes("gemini-")) return [PROMPT_GEMINI]
-  if (model.api.id.includes("claude")) return [PROMPT_ANTHROPIC]
-  if (model.api.id.toLowerCase().includes("trinity")) return [PROMPT_TRINITY]
-  if (model.api.id.toLowerCase().includes("kimi")) return [PROMPT_KIMI]
-  return [PROMPT_DEFAULT]
+// Available supplemental context — keyed by the name used in agent.options.supplemental
+const SUPPLEMENTAL_CONTEXT: Record<string, { name: string; content: string }> = {
+  "git-workflow": { name: "Git Workflow", content: GIT_WORKFLOW },
+  "github-cli": { name: "GitHub CLI", content: GITHUB_CLI },
 }
 
 export interface Interface {
-  readonly environment: (model: Provider.Model) => Effect.Effect<string[]>
+  readonly systemPrompt: (toolIds: string[], agent: Agent.Info) => string[]
   readonly skills: (agent: Agent.Info) => Effect.Effect<string | undefined>
 }
 
@@ -45,22 +30,19 @@ export const layer = Layer.effect(
     const skill = yield* Skill.Service
 
     return Service.of({
-      environment: Effect.fn("SystemPrompt.environment")(function* (model: Provider.Model) {
-        const ctx = yield* InstanceState.context
-        return [
-          [
-            `You are powered by the model named ${model.api.id}. The exact model ID is ${model.providerID}/${model.api.id}`,
-            `Here is some useful information about the environment you are running in:`,
-            `<env>`,
-            `  Working directory: ${ctx.directory}`,
-            `  Workspace root folder: ${ctx.worktree}`,
-            `  Is directory a git repo: ${ctx.project.vcs === "git" ? "yes" : "no"}`,
-            `  Platform: ${process.platform}`,
-            `  Today's date: ${new Date().toDateString()}`,
-            `</env>`,
-          ].join("\n"),
-        ]
-      }),
+      systemPrompt(toolIds, agent) {
+        const facts = fromToolIds(toolIds)
+        const supplementalKeys = (agent.options?.supplemental ?? []) as string[]
+        const supplemental = supplementalKeys
+          .map((key) => SUPPLEMENTAL_CONTEXT[key])
+          .filter(Boolean)
+        return build({
+          facts,
+          workingDirectory: Instance.directory,
+          platform: process.platform,
+          supplemental,
+        })
+      },
 
       skills: Effect.fn("SystemPrompt.skills")(function* (agent: Agent.Info) {
         if (Permission.disabled(["skill"], agent.permission).has("skill")) return
