@@ -117,18 +117,11 @@ describe("build", () => {
 })
 
 describe("tool section conditionality", () => {
-  test("read section references glob when glob present", () => {
-    const result = build(baseInput(["read", "glob"]))
-    const joined = result.join("\n")
-    const readSection = joined.substring(joined.indexOf("## `Read` Tool"), joined.indexOf("## `Glob` Tool"))
-    expect(readSection).toContain("glob")
-  })
-
-  test("read section omits glob reference when glob absent", () => {
+  test("read section mentions directory support", () => {
     const result = build(baseInput(["read"]))
     const joined = result.join("\n")
     const readSection = joined.substring(joined.indexOf("## `Read` Tool"))
-    expect(readSection).not.toContain("glob")
+    expect(readSection).toContain("directories")
   })
 
   test("grep section says 'use instead of shell grep' when bash present", () => {
@@ -150,17 +143,10 @@ describe("tool section conditionality", () => {
     expect(writeSection).not.toContain("not small edits")
   })
 
-  test("edit section mentions old_string matching when read absent", () => {
+  test("edit section present when read absent", () => {
     const result = build(baseInput(["edit"]))
     const joined = result.join("\n")
-    expect(joined).toContain("`old_string` must match")
-  })
-
-  test("edit section omits old_string matching when read present", () => {
-    const result = build(baseInput(["edit", "read"]))
-    const joined = result.join("\n")
-    const editSection = joined.substring(joined.indexOf("## `Edit` Tool"))
-    expect(editSection).not.toContain("`old_string` must match")
+    expect(joined).toContain("## `Edit` Tool")
   })
 
   test("task section lists only available local tools", () => {

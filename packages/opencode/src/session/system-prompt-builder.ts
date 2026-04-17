@@ -63,7 +63,7 @@ function buildToolSections(facts: ToolPromptFacts): string[] {
 function buildBashSection(facts: ToolPromptFacts): string {
   const lines = [
     "- Use it for terminal work (git, package managers, test runners, docker) and shell-native search/filter jobs the specialized tools do not handle well.",
-    "- Output includes stdout, stderr under [stderr], and non-zero exit codes as [exit code: N].",
+    "- Output combines stdout and stderr. Non-zero exit codes are not shown in the output text.",
     "- For independent commands, make parallel bash calls. For dependent commands, use one call with &&.",
     "- Quote paths that contain spaces.",
   ]
@@ -73,19 +73,9 @@ function buildBashSection(facts: ToolPromptFacts): string {
 function buildReadSection(facts: ToolPromptFacts): string {
   const lines = [
     "- Returns `{n}: text`. Lines over 2000 chars are truncated.",
-  ]
-  if (facts.has_glob && facts.has_bash) {
-    lines.push("- Reads files, not directories. Use `glob` to find files or `bash` for directory listings.")
-  } else if (facts.has_glob) {
-    lines.push("- Reads files, not directories. Use `glob` to find files.")
-  } else if (facts.has_bash) {
-    lines.push("- Reads files, not directories. Use `bash` for directory listings.")
-  } else {
-    lines.push("- Reads files, not directories.")
-  }
-  lines.push("- Missing files return an error. Non-text files are returned as text bytes; there is no special image rendering.")
-  lines.push("- Read related files in parallel when useful.")
-  return lines.join("\n")
+    "- Supports files and directories. Missing files return an error. Binary files cannot be read.",
+    "- Read related files in parallel when useful.",
+  ].join("\n")
 }
 
 function buildWriteSection(facts: ToolPromptFacts): string {
@@ -98,9 +88,6 @@ function buildWriteSection(facts: ToolPromptFacts): string {
 
 function buildEditSection(facts: ToolPromptFacts): string {
   const lines = []
-  if (!facts.has_read) {
-    lines.push("- `old_string` must match the existing file text exactly.")
-  }
   lines.push(`- Without \`replaceAll\` the edit fails if \`old_string\` is missing or appears more than once.`)
   lines.push(`- The edit also fails if \`old_string\` is empty or equal to \`new_string\`.`)
   return lines.join("\n")
@@ -109,8 +96,8 @@ function buildEditSection(facts: ToolPromptFacts): string {
 function buildGlobSection(facts: ToolPromptFacts): string {
   const lines = [
     "- Supports *, **, ?, [abc], and {a,b}.",
-    "- Returns matching file paths relative to the search directory.",
-    "- Results are capped at 1000; large result sets are returned with truncated: true.",
+    "- Returns matching file paths as absolute paths, sorted newest first.",
+    "- Results are capped at 100; large result sets are truncated.",
   ]
   if (!facts.has_grep) {
     lines.push("- Use it for file-name search, not content search.")
@@ -152,11 +139,11 @@ function buildTodoWriteSection(): string {
 }
 
 function buildWebFetchSection(): string {
-  return "- Fetch one URL. HTML is converted to Markdown and JSON is pretty-printed."
+  return "- Fetch one URL. HTML is converted to Markdown."
 }
 
 function buildApplyPatchSection(): string {
-  return "- Apply a unified diff patch to a file. Use this instead of edit/write for GPT models."
+  return "- Apply a patch to files using the `*** Begin Patch` format. Use this instead of edit/write for GPT models."
 }
 
 function buildQuestionSection(): string {
@@ -168,7 +155,7 @@ function buildLspSection(): string {
 }
 
 function buildCodeSearchSection(): string {
-  return "- Search the codebase using semantic code search."
+  return "- Search external code documentation and APIs using semantic code search."
 }
 
 function buildWebSearchSection(): string {
