@@ -11,7 +11,7 @@ import { Instance } from "@/project/instance"
 import type { Agent } from "@/agent/agent"
 import type { MessageV2 } from "./message-v2"
 import { Plugin } from "@/plugin"
-import { SystemPrompt } from "./system"
+
 import { Flag } from "@/flag/flag"
 import { Permission } from "@/permission"
 import { PermissionID } from "@/permission/schema"
@@ -99,9 +99,9 @@ const live: Layer.Layer<
       const system: string[] = []
       system.push(
         [
-          // use agent prompt otherwise provider prompt
-          ...(input.agent.prompt ? [input.agent.prompt] : SystemPrompt.provider(input.model)),
-          // any custom prompt passed into this call
+          // agent-specific prompt override (if any)
+          ...(input.agent.prompt ? [input.agent.prompt] : []),
+          // unified system prompt (environment + tool guidelines + supplemental)
           ...input.system,
           // any custom prompt from last user message
           ...(input.user.system ? [input.user.system] : []),
