@@ -203,6 +203,7 @@ describe("tool.shell", () => {
           const bash = yield* initBash()
           const fallback = Shell.name(Shell.acceptable("fish"))
           expect(fallback).not.toBe("fish")
+          // Description is now a short schema summary, not shell-specific instructions
 
           const result = yield* bash.execute(
             {
