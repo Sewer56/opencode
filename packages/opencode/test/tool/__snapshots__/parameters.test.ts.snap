@@ -52,7 +52,7 @@ exports[`tool parameters JSON Schema (wire shape) edit 1`] = `
       "type": "string",
     },
     "newString": {
-      "description": "The text to replace it with (must be different from oldString)",
+      "description": "Replacement text (must differ from oldString)",
       "type": "string",
     },
     "oldString": {
@@ -60,7 +60,7 @@ exports[`tool parameters JSON Schema (wire shape) edit 1`] = `
       "type": "string",
     },
     "replaceAll": {
-      "description": "Replace all occurrences of oldString (default false)",
+      "description": "Replace all occurrences",
       "type": "boolean",
     },
   },
@@ -78,7 +78,7 @@ exports[`tool parameters JSON Schema (wire shape) glob 1`] = `
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
     "path": {
-      "description": "The directory to search in. If not specified, the current working directory will be used. IMPORTANT: Omit this field to use the default directory. DO NOT enter "undefined" or "null" - simply omit it for the default behavior. Must be a valid directory path if provided.",
+      "description": "Directory to search in. Defaults to cwd.",
       "type": "string",
     },
     "pattern": {
@@ -98,7 +98,7 @@ exports[`tool parameters JSON Schema (wire shape) grep 1`] = `
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
     "include": {
-      "description": "File pattern to include in the search (e.g. "*.js", "*.{ts,tsx}")",
+      "description": "File pattern to include",
       "type": "string",
     },
     "path": {
@@ -302,7 +302,7 @@ exports[`tool parameters JSON Schema (wire shape) task 1`] = `
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
     "background": {
-      "description": "Run the agent in the background. You will be notified when it completes. DO NOT sleep, poll, or proactively check on its progress",
+      "description": "Run in background; return immediately",
       "type": "boolean",
     },
     "command": {
@@ -322,7 +322,7 @@ exports[`tool parameters JSON Schema (wire shape) task 1`] = `
       "type": "string",
     },
     "task_id": {
-      "description": "This should only be set if you mean to resume a previous task (you can pass a prior task_id and the task will continue the same subagent session as before instead of creating a fresh one)",
+      "description": "Resume previous task by passing its task_id",
       "type": "string",
     },
   },
@@ -378,8 +378,7 @@ exports[`tool parameters JSON Schema (wire shape) webfetch 1`] = `
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
     "format": {
-      "default": "markdown",
-      "description": "The format to return the content in (text, markdown, or html). Defaults to markdown.",
+      "description": "Response format",
       "enum": [
         "text",
         "markdown",
@@ -408,11 +407,11 @@ exports[`tool parameters JSON Schema (wire shape) websearch 1`] = `
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "properties": {
     "contextMaxCharacters": {
-      "description": "Maximum characters for context string optimized for LLMs (default: 10000)",
+      "description": "Max context characters",
       "type": "number",
     },
     "livecrawl": {
-      "description": "Live crawl mode - 'fallback': use live crawling as backup if cached content unavailable, 'preferred': prioritize live crawling (default: 'fallback')",
+      "description": "Live crawl mode",
       "enum": [
         "fallback",
         "preferred",
@@ -420,15 +419,15 @@ exports[`tool parameters JSON Schema (wire shape) websearch 1`] = `
       "type": "string",
     },
     "numResults": {
-      "description": "Number of search results to return (default: 8)",
+      "description": "Number of results",
       "type": "number",
     },
     "query": {
-      "description": "Websearch query",
+      "description": "Web search query",
       "type": "string",
     },
     "type": {
-      "description": "Search type - 'auto': balanced search (default), 'fast': quick results, 'deep': comprehensive search",
+      "description": "Search type",
       "enum": [
         "auto",
         "fast",

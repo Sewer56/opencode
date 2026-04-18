@@ -45,8 +45,7 @@ const BaseParameterFields = {
   prompt: Schema.String.annotate({ description: "The task for the agent to perform" }),
   subagent_type: Schema.String.annotate({ description: "The type of specialized agent to use for this task" }),
   task_id: Schema.optional(Schema.String).annotate({
-    description:
-      "This should only be set if you mean to resume a previous task (you can pass a prior task_id and the task will continue the same subagent session as before instead of creating a fresh one)",
+    description: "Resume previous task by passing its task_id",
   }),
   command: Schema.optional(Schema.String).annotate({ description: "The command that triggered this task" }),
 }
@@ -56,8 +55,7 @@ const BaseParameters = Schema.Struct(BaseParameterFields)
 export const Parameters = Schema.Struct({
   ...BaseParameterFields,
   background: Schema.optional(Schema.Boolean).annotate({
-    description:
-      "Run the agent in the background. You will be notified when it completes. DO NOT sleep, poll, or proactively check on its progress",
+    description: "Run in background; return immediately",
   }),
 })
 
