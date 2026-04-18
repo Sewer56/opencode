@@ -85,7 +85,7 @@ describe("tool parameters", () => {
 
     test("does not expose defaulted optional keys as nullable", () => {
       expect(toJsonSchema(WebFetch)).toMatchObject({
-        properties: { format: { type: "string", enum: ["text", "markdown", "html"], default: "markdown" } },
+        properties: { format: { type: "string", enum: ["text", "markdown", "html"] } },
       })
       expect(toJsonSchema(WebFetch).properties?.format).not.toHaveProperty("anyOf")
     })

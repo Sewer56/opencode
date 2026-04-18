@@ -35,16 +35,16 @@ const layer = Layer.effect(
     const mcp = yield* MCP.Service
 
     return Service.of({
-      systemPrompt: Effect.fn("SystemPrompt.systemPrompt")(function* (toolIds, agent) {
+      systemPrompt: Effect.fn("SystemPrompt.systemPrompt")(function* (toolIds: string[], agent: Agent.Info) {
+        const ctx = yield* InstanceState.context
         const facts = fromToolIds(toolIds)
         const supplementalKeys = (agent.options?.supplemental ?? []) as string[]
         const supplemental = supplementalKeys
           .map((key) => SUPPLEMENTAL_CONTEXT[key])
           .filter(Boolean)
-        const dir = yield* InstanceState.directory
         return build({
           facts,
-          workingDirectory: dir,
+          workingDirectory: ctx.directory,
           platform: process.platform,
           supplemental,
         })
