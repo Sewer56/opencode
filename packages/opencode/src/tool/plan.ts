@@ -9,8 +9,19 @@ import { Provider } from "@/provider/provider"
 import { InstanceState } from "@/effect/instance-state"
 import { MessageID, PartID } from "../session/schema"
 import EXIT_DESCRIPTION from "./plan-exit.txt"
+import { SessionID } from "../session/schema"
 
-export const Parameters = Schema.Struct({})
+const Parameters = Schema.Struct({})
+
+function getLastModel(sessionID: SessionID) {
+  return Effect.gen(function* () {
+    const items = yield* MessageV2.stream(sessionID)
+    for (const item of items) {
+      if (item.info.role === "user" && item.info.model) return item.info.model
+    }
+    return undefined
+  })
+}
 
 export const PlanExitTool = Tool.define(
   "plan_exit",
