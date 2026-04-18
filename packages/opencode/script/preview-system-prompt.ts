@@ -29,7 +29,6 @@ import APPLY_PATCH_DESC from "../src/tool/apply_patch.txt"
 import QUESTION_DESC from "../src/tool/question.txt"
 import WRITE_DESC from "../src/tool/write.txt"
 import LSP_DESC from "../src/tool/lsp.txt"
-import MULTIEDIT_DESC from "../src/tool/multiedit.txt"
 
 // Tool parameters (schemas)
 import { Parameters as BashParams } from "../src/tool/bash"
@@ -46,7 +45,6 @@ import { Parameters as ApplyPatchParams } from "../src/tool/apply_patch"
 import { Parameters as QuestionParams } from "../src/tool/question"
 import { Parameters as WriteParams } from "../src/tool/write"
 import { Parameters as LspParams } from "../src/tool/lsp"
-import { Parameters as MultieditParams } from "../src/tool/multiedit"
 
 const args = process.argv.slice(2)
 
@@ -54,7 +52,7 @@ const args = process.argv.slice(2)
 const toolsArg = args.find((a) => a.startsWith("--tools="))
 const toolIds = toolsArg
   ? toolsArg.replace("--tools=", "").split(",")
-  : ["bash", "read", "edit", "write", "glob", "grep", "task", "todowrite", "webfetch", "websearch", "codesearch", "apply_patch", "question", "lsp", "multiedit"]
+  : ["bash", "read", "edit", "write", "glob", "grep", "task", "todowrite", "webfetch", "websearch", "codesearch", "apply_patch", "question", "lsp"]
 
 // Parse --supplemental argument
 const supplementalArg = args.find((a) => a.startsWith("--supplemental="))
@@ -85,7 +83,6 @@ const toolMetadata: Record<string, { description: string; parameters: any }> = {
   apply_patch: { description: APPLY_PATCH_DESC, parameters: ApplyPatchParams },
   question: { description: QUESTION_DESC, parameters: QuestionParams },
   lsp: { description: LSP_DESC, parameters: LspParams },
-  multiedit: { description: MULTIEDIT_DESC, parameters: MultieditParams },
 }
 
 function applyBashTemplate(desc: string): string {

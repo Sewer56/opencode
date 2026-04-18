@@ -43,35 +43,28 @@ export function build(input: BuilderInput): string[] {
 
 function buildToolSections(facts: ToolPromptFacts): string[] {
   const sections: string[] = []
-  if (facts.has_bash) sections.push("## `Bash` Tool\n" + buildBashSection(facts))
-  if (facts.has_read) sections.push("## `Read` Tool\n" + buildReadSection(facts))
+  if (facts.has_bash) sections.push("## `Bash` Tool\n" + buildBashSection())
+  if (facts.has_read) sections.push("## `Read` Tool\n" + buildReadSection())
   if (facts.has_write) sections.push("## `Write` Tool\n" + buildWriteSection(facts))
-  if (facts.has_edit) sections.push("## `Edit` Tool\n" + buildEditSection(facts))
-  if (facts.has_glob) sections.push("## `Glob` Tool\n" + buildGlobSection(facts))
+  if (facts.has_edit) sections.push("## `Edit` Tool\n" + buildEditSection())
+  if (facts.has_glob) sections.push("## `Glob` Tool\n" + buildGlobSection())
   if (facts.has_grep) sections.push("## `Grep` Tool\n" + buildGrepSection(facts))
   if (facts.has_task) sections.push("## `Task` Tool\n" + buildTaskSection(facts))
-  if (facts.has_todowrite) sections.push("## `TodoWrite` Tool\n" + buildTodoWriteSection())
-  if (facts.has_webfetch) sections.push("## `WebFetch` Tool\n" + buildWebFetchSection())
   if (facts.has_apply_patch) sections.push("## `ApplyPatch` Tool\n" + buildApplyPatchSection())
-  if (facts.has_question) sections.push("## `Question` Tool\n" + buildQuestionSection())
-  if (facts.has_lsp) sections.push("## `LSP` Tool\n" + buildLspSection())
-  if (facts.has_codesearch) sections.push("## `CodeSearch` Tool\n" + buildCodeSearchSection())
-  if (facts.has_websearch) sections.push("## `WebSearch` Tool\n" + buildWebSearchSection())
   return sections
 }
 
-function buildBashSection(facts: ToolPromptFacts): string {
-  const lines = [
-    "- Use it for terminal work (git, package managers, test runners, docker) and shell-native search/filter jobs the specialized tools do not handle well.",
-    "- Output combines stdout and stderr. Non-zero exit codes are not shown in the output text.",
-    "- For independent commands, make parallel bash calls. For dependent commands, use one call with &&.",
+function buildBashSection(): string {
+  return [
+    "- For terminal work and shell-native tasks specialized tools don't handle.",
+    "- Output combines stdout and stderr. Non-zero exit codes not shown.",
+    "- Independent commands: parallel calls. Dependent: chain with &&.",
     "- Quote paths that contain spaces.",
-  ]
-  return lines.join("\n")
+  ].join("\n")
 }
 
-function buildReadSection(facts: ToolPromptFacts): string {
-  const lines = [
+function buildReadSection(): string {
+  return [
     "- Returns `{n}: text`. Lines over 2000 chars are truncated.",
     "- Supports files and directories. Missing files return an error. Binary files cannot be read.",
     "- Read related files in parallel when useful.",
@@ -86,23 +79,16 @@ function buildWriteSection(facts: ToolPromptFacts): string {
   return lines.join("\n")
 }
 
-function buildEditSection(facts: ToolPromptFacts): string {
-  const lines = []
-  lines.push(`- Without \`replaceAll\` the edit fails if \`old_string\` is missing or appears more than once.`)
-  lines.push(`- The edit also fails if \`old_string\` is empty or equal to \`new_string\`.`)
-  return lines.join("\n")
+function buildEditSection(): string {
+  return "- `old_string` must be non-empty, differ from `new_string`, and appear exactly once (unless `replaceAll`)."
 }
 
-function buildGlobSection(facts: ToolPromptFacts): string {
-  const lines = [
+function buildGlobSection(): string {
+  return [
     "- Supports *, **, ?, [abc], and {a,b}.",
     "- Returns matching file paths as absolute paths, sorted newest first.",
     "- Results are capped at 100; large result sets are truncated.",
-  ]
-  if (!facts.has_grep) {
-    lines.push("- Use it for file-name search, not content search.")
-  }
-  return lines.join("\n")
+  ].join("\n")
 }
 
 function buildGrepSection(facts: ToolPromptFacts): string {
@@ -121,7 +107,7 @@ function buildGrepSection(facts: ToolPromptFacts): string {
 
 function buildTaskSection(facts: ToolPromptFacts): string {
   const lines = [
-    "- Use task for real delegation or parallel sub-work. Tasks are stateless - include full context; do not rely on prior state.",
+    "- Use for real delegation or parallel sub-work. Include full context; stateless — don't rely on prior state.",
   ]
   const localTools = []
   if (facts.has_read) localTools.push("read")
@@ -130,36 +116,12 @@ function buildTaskSection(facts: ToolPromptFacts): string {
   if (localTools.length > 0) {
     lines.push(`- Do not use it when \`${localTools.join("`, `")}\` on one or a few files is enough.`)
   }
-  lines.push("- The delegated result is returned only to you, so summarize it for the user.")
+  lines.push("- Results are private to you; summarize for the user.")
   return lines.join("\n")
-}
-
-function buildTodoWriteSection(): string {
-  return "- Replace the full todo list. All existing todos are overwritten."
-}
-
-function buildWebFetchSection(): string {
-  return "- Fetch one URL. HTML is converted to Markdown."
 }
 
 function buildApplyPatchSection(): string {
   return "- Apply a patch to files using the `*** Begin Patch` format. Use this instead of edit/write for GPT models."
-}
-
-function buildQuestionSection(): string {
-  return "- Ask the user a question when you need clarification."
-}
-
-function buildLspSection(): string {
-  return "- Query the Language Server Protocol for diagnostics, definitions, references, and hover information."
-}
-
-function buildCodeSearchSection(): string {
-  return "- Search external code documentation and APIs using semantic code search."
-}
-
-function buildWebSearchSection(): string {
-  return "- Search the web for information."
 }
 
 export * as SystemPromptBuilder from "./system-prompt-builder"

@@ -57,8 +57,7 @@ export const Parameters = Schema.Struct({
     description: `The working directory to run the command in. Defaults to the current directory. Use this instead of 'cd' commands.`,
   }),
   description: Schema.String.annotate({
-    description:
-      "Clear, concise description of what this command does in 5-10 words. Examples:\nInput: ls\nOutput: Lists files in current directory\n\nInput: git status\nOutput: Shows working tree status\n\nInput: npm install\nOutput: Installs package dependencies\n\nInput: mkdir foo\nOutput: Creates directory 'foo'",
+    description: "Brief description of what this command does in 5-10 words",
   }),
 })
 

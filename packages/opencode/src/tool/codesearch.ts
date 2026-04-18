@@ -13,8 +13,7 @@ export const Parameters = Schema.Struct({
     .check(Schema.isLessThanOrEqualTo(50000))
     .pipe(Schema.optional, Schema.withDecodingDefault(Effect.succeed(5000)))
     .annotate({
-      description:
-        "Number of tokens to return (1000-50000). Default is 5000 tokens. Adjust this value based on how much context you need - use lower values for focused queries and higher values for comprehensive documentation.",
+      description: "Number of tokens of context to return",
     }),
 })
 

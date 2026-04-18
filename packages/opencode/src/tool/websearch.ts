@@ -5,19 +5,18 @@ import * as McpExa from "./mcp-exa"
 import DESCRIPTION from "./websearch.txt"
 
 export const Parameters = Schema.Struct({
-  query: Schema.String.annotate({ description: "Websearch query" }),
+  query: Schema.String.annotate({ description: "Web search query" }),
   numResults: Schema.optional(Schema.Number).annotate({
-    description: "Number of search results to return (default: 8)",
+    description: "Number of results",
   }),
   livecrawl: Schema.optional(Schema.Literals(["fallback", "preferred"])).annotate({
-    description:
-      "Live crawl mode - 'fallback': use live crawling as backup if cached content unavailable, 'preferred': prioritize live crawling (default: 'fallback')",
+    description: "Live crawl mode",
   }),
   type: Schema.optional(Schema.Literals(["auto", "fast", "deep"])).annotate({
-    description: "Search type - 'auto': balanced search (default), 'fast': quick results, 'deep': comprehensive search",
+    description: "Search type",
   }),
   contextMaxCharacters: Schema.optional(Schema.Number).annotate({
-    description: "Maximum characters for context string optimized for LLMs (default: 10000)",
+    description: "Max context characters",
   }),
 })
 
