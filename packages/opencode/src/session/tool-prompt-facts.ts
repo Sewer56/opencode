@@ -82,7 +82,7 @@ export function buildCommonRules(facts: ToolPromptFacts): string {
     const parts: string[] = []
     if (facts.has_glob) parts.push("`glob` for file-name search")
     if (facts.has_grep) parts.push("`grep` for content search")
-    if (facts.has_read) parts.push("`read` for full-file inspection")
+    if (facts.has_read) parts.push("`read` for file content")
     if (parts.length === 2) {
       rules.push("Use " + parts[0] + " and " + parts[1] + ".")
     } else if (parts.length >= 3) {
@@ -97,9 +97,9 @@ export function buildCommonRules(facts: ToolPromptFacts): string {
 
   // Read before edit — correct prefix format: {n}: (not L{n}:)
   if (facts.has_read && facts.has_edit) {
-    rules.push("Read a file before `edit`, then copy exact text from `read` and omit any `{n}: ` prefixes.")
+    rules.push("Read before `edit`, then copy exact text and omit any `{n}: ` prefixes.")
   } else if (facts.has_read && facts.has_write && !facts.has_edit) {
-    rules.push("Read a file before `write` if it already exists.")
+    rules.push("Read before `write` if the file already exists.")
   }
 
   return rules.join("\n")
