@@ -15,7 +15,7 @@ import GIT_WORKFLOW from "../src/session/supplemental/git-workflow.txt"
 import GITHUB_CLI from "../src/session/supplemental/github-cli.txt"
 
 // Tool descriptions
-import BASH_DESC from "../src/tool/bash.txt"
+import BASH_DESC from "../src/tool/shell/shell.txt"
 import EDIT_DESC from "../src/tool/edit.txt"
 import GLOB_DESC from "../src/tool/glob.txt"
 import GREP_DESC from "../src/tool/grep.txt"
@@ -30,7 +30,7 @@ import WRITE_DESC from "../src/tool/write.txt"
 import LSP_DESC from "../src/tool/lsp.txt"
 
 // Tool parameters (schemas)
-import { Parameters as BashParams } from "../src/tool/bash"
+import { Parameters as BashParams } from "../src/tool/shell"
 import { Parameters as EditParams } from "../src/tool/edit"
 import { Parameters as GlobParams } from "../src/tool/glob"
 import { Parameters as GrepParams } from "../src/tool/grep"

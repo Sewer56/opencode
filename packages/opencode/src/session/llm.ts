@@ -12,7 +12,6 @@ import type { Agent } from "@/agent/agent"
 import type { MessageV2 } from "./message-v2"
 import { Plugin } from "@/plugin"
 
-import { Flag } from "@/flag/flag"
 import { Permission } from "@/permission"
 import { PermissionID } from "@/permission/schema"
 import { Bus } from "@/bus"
@@ -375,7 +374,6 @@ const live: Layer.Layer<
                 "x-opencode-project": opencodeProjectID,
                 "x-opencode-session": input.sessionID,
                 "x-opencode-request": input.user.id,
-                "x-opencode-client": Flag.OPENCODE_CLIENT,
                 "User-Agent": `opencode/${InstallationVersion}`,
               }
             : {
