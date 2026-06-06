@@ -102,6 +102,7 @@ const live: Layer.Layer<
         { concurrency: "unbounded" },
       )
 
+
       const isWorkflow = language instanceof GitLabWorkflowLanguageModel
       const prepared = yield* LLMRequestPrep.prepare({
         ...input,

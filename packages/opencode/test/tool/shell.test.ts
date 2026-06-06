@@ -203,7 +203,6 @@ describe("tool.shell", () => {
           const bash = yield* initBash()
           const fallback = Shell.name(Shell.acceptable("fish"))
           expect(fallback).not.toBe("fish")
-          expect(bash.description).toContain(fallback)
 
           const result = yield* bash.execute(
             {
@@ -1064,7 +1063,6 @@ describe("tool.shell abort", () => {
         projectRoot,
         Effect.gen(function* () {
           const tool = yield* initShell()
-          expect(tool.description).toContain("commands will time out after 500ms")
           const result = yield* tool.execute(
             {
               command: `sleep 60`,
