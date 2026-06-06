@@ -252,6 +252,7 @@ const layer = Layer.effect(
         .pipe(Effect.catchCause((cause) => Effect.logError("failed to generate title", { error: Cause.squash(cause) })))
     })
 
+
     const handleSubtask = Effect.fn("SessionPrompt.handleSubtask")(function* (input: {
       task: SessionV1.SubtaskPart
       model: Provider.Model
@@ -827,7 +828,7 @@ const layer = Layer.effect(
                   .pipe(Effect.onInterrupt(() => Effect.sync(() => controller.abort())))
               }
 
-              if (mime === "text/plain") {
+              if (part.mime === "text/plain") {
                 let offset: number | undefined
                 let limit: number | undefined
                 const range = { start: url.searchParams.get("start"), end: url.searchParams.get("end") }
@@ -885,7 +886,7 @@ const layer = Layer.effect(
                       })),
                     )
                   } else {
-                    pieces.push({ ...part, mime, messageID: info.id, sessionID: input.sessionID })
+                    pieces.push({ ...part, messageID: info.id, sessionID: input.sessionID })
                   }
                 } else {
                   const error = Cause.squash(exit.cause)
@@ -906,7 +907,7 @@ const layer = Layer.effect(
                 return pieces
               }
 
-              if (mime === "application/x-directory") {
+              if (part.mime === "application/x-directory") {
                 const args = { filePath: filepath }
                 const exit = yield* execRead(args).pipe(Effect.exit)
                 if (Exit.isFailure(exit)) {
@@ -942,7 +943,7 @@ const layer = Layer.effect(
                     synthetic: true,
                     text: exit.value.output,
                   },
-                  { ...part, mime, messageID: info.id, sessionID: input.sessionID },
+                  { ...part, messageID: info.id, sessionID: input.sessionID },
                 ]
               }
 
@@ -960,9 +961,9 @@ const layer = Layer.effect(
                   sessionID: input.sessionID,
                   type: "file",
                   url:
-                    `data:${mime};base64,` +
+                    `data:${part.mime};base64,` +
                     Buffer.from(yield* fsys.readFile(filepath).pipe(Effect.catch(Effect.die))).toString("base64"),
-                  mime,
+                  mime: part.mime,
                   filename: part.filename!,
                   source: part.source,
                 },
@@ -1254,19 +1255,17 @@ const layer = Layer.effect(
 
             yield* plugin.trigger("experimental.chat.messages.transform", {}, { messages: msgs })
 
-            const [skills, env, instructions, mcpInstructions, modelMsgs] = yield* Effect.all([
+            const [skills, instructions, mcpInstructions, modelMsgs] = yield* Effect.all([
               sys.skills(agent),
-              sys.environment(model),
               instruction.system().pipe(Effect.orDie),
               sys.mcp(agent, session.permission),
               MessageV2.toModelMessagesEffect(msgs, model),
             ])
-            const system = [
-              ...env,
-              ...instructions,
-              ...(mcpInstructions ? [mcpInstructions] : []),
-              ...(skills ? [skills] : []),
-            ]
+            const toolIds = Object.keys(tools)
+            const system = yield* sys.systemPrompt(toolIds, agent)
+            if (skills) system.push(skills)
+            system.push(...instructions)
+            if (mcpInstructions) system.push(mcpInstructions)
             const format = lastUser.format ?? { type: "text" as const }
             if (format.type === "json_schema") system.push(STRUCTURED_OUTPUT_SYSTEM_PROMPT)
             const result = yield* handle.process({
