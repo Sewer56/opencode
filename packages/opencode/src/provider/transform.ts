@@ -165,6 +165,27 @@ function normalizeMessages(
     }
   })
 
+  // Merge consecutive initial system messages into one.
+  // Some providers (vLLM/Qwen via Makora) reject multiple system messages.
+  {
+    const merged: string[] = []
+    let i = 0
+    while (i < msgs.length && msgs[i].role === "system") {
+      merged.push(typeof msgs[i].content === "string" ? (msgs[i].content as string) : "")
+      i++
+    }
+    if (i > 1) {
+      msgs = [
+        {
+          role: "system",
+          content: merged.join("\n\n"),
+          providerOptions: (msgs[0] as any).providerOptions,
+        } as ModelMessage,
+        ...msgs.slice(i),
+      ]
+    }
+  }
+
   // Anthropic rejects messages with empty content - filter out empty string messages
   // and remove empty text/reasoning parts from array content
   if (model.api.npm === "@ai-sdk/anthropic") {
