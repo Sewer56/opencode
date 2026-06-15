@@ -11,7 +11,7 @@
   installShellFiles,
   versionCheckHook,
   writableTmpDirAsHomeHook,
-  node_modules ? callPackage ./node-modules.nix { },
+  node_modules ? callPackage ./node-modules.nix {},
 }:
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "opencode";
@@ -67,14 +67,14 @@ stdenvNoCC.mkDerivation (finalAttrs: {
 
     wrapProgram $out/bin/opencode \
       --prefix PATH : ${
-        lib.makeBinPath (
-          [
-            ripgrep
-          ]
-          # bun runs sysctl to detect if running on rosetta2
-          ++ lib.optional stdenvNoCC.hostPlatform.isDarwin sysctl
-        )
-      }
+      lib.makeBinPath (
+        [
+          ripgrep
+        ]
+        # bun runs sysctl to detect if running on rosetta2
+        ++ lib.optional stdenvNoCC.hostPlatform.isDarwin sysctl
+      )
+    }
 
     runHook postInstall
   '';
@@ -91,7 +91,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
     writableTmpDirAsHomeHook
   ];
   doInstallCheck = true;
-  versionCheckKeepEnvironment = [ "HOME" "OPENCODE_DISABLE_MODELS_FETCH" ];
+  versionCheckKeepEnvironment = ["HOME" "OPENCODE_DISABLE_MODELS_FETCH"];
   versionCheckProgramArg = "--version";
 
   passthru = {
