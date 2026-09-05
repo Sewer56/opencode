@@ -29,6 +29,7 @@ import { DbCommand } from "./cli/cmd/db"
 import { errorMessage } from "./util/error"
 import { PluginCommand } from "./cli/cmd/plug"
 import { Heap } from "./cli/heap"
+import { realpathSync } from "node:fs"
 
 const args = hideBin(process.argv)
 
@@ -116,6 +117,10 @@ const cli = yargs(args)
   .strict()
 
 try {
+  // Keep the process and commands that consult PWD on the same physical path.
+  process.chdir(realpathSync(process.cwd()))
+  process.env.PWD = process.cwd()
+
   if (args.includes("-h") || args.includes("--help")) {
     await cli.parse(args, (err: Error | undefined, _argv: unknown, out: string) => {
       if (err) throw err
