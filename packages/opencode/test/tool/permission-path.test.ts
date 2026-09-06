@@ -191,6 +191,52 @@ for (const mode of ["write", "edit", "patch", "move"] as const) {
     )
   }
 
+  // Default-deny rulesets ("*": deny plus a narrow allow) treat alias spellings of granted
+  // in-worktree targets as outside the worktree, so the spelling deny must defer to the grant.
+  for (const granted of [true, false] as const) {
+    it.instance(
+      `${mode}_should_${granted ? "write" : "deny"}_when_alias_target_${granted ? "granted" : "ungranted"}_under_catch_all_deny`,
+      () =>
+        Effect.gen(function* () {
+          const test = yield* fixture()
+          const permission = yield* Permission.Service
+          const relative = granted ? "artifact/file.txt" : "src/file.txt"
+          const canonical = path.join(test.directory, relative)
+          const target = path.join(test.alias, relative)
+          yield* Effect.promise(() => fs.mkdir(path.dirname(canonical), { recursive: true }))
+          yield* Effect.promise(() => fs.writeFile(canonical, "old\n"))
+
+          const ctx: Tool.Context = {
+            ...test.ctx,
+            ask: (input) =>
+              permission
+                .ask({
+                  ...input,
+                  sessionID: test.ctx.sessionID,
+                  ruleset: [
+                    { permission: "*", pattern: "*", action: "deny" },
+                    { permission: "external_directory", pattern: "*", action: "ask" },
+                    { permission: "external_directory", pattern: `${test.outside}/**`, action: "allow" },
+                    { permission: "edit", pattern: "artifact/**", action: "allow" },
+                  ],
+                })
+                .pipe(Effect.orDie),
+          }
+
+          const result = yield* execute(target, true, ctx).pipe(Effect.exit)
+
+          expect(Exit.isFailure(result)).toBe(!granted)
+          if (!granted && Exit.isFailure(result)) expect(Cause.pretty(result.cause)).toContain("PermissionDeniedError")
+          expect(yield* Effect.promise(() => fs.readFile(canonical, "utf8"))).toBe(granted ? "new\n" : "old\n")
+          if (mode === "move")
+            expect(
+              yield* Effect.promise(() => Bun.file(path.join(path.dirname(canonical), "source.txt")).exists()),
+            ).toBe(!granted)
+        }),
+      { git: true },
+    )
+  }
+
   it.instance(
     `${mode}_should_prompt_for_canonical_directory_when_symlink_points_outward`,
     () =>

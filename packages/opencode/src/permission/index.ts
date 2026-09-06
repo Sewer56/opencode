@@ -11,7 +11,11 @@ export const Event = PermissionV1.Event
 
 // Internal authorization hints are not part of the permission event or wire schema.
 export type AskInput = PermissionV1.AskInput & {
-  /** Alternate spellings checked for effective denials, never used to grant access or require approval. */
+  /**
+   * Alternate spellings checked for effective denials, never used to grant access or
+   * require approval. Catch-all denies are skipped when the `patterns` entry at the
+   * same index is explicitly granted.
+   */
   denyPatterns?: readonly string[]
 }
 
@@ -75,8 +79,19 @@ const layer = Layer.effect(
       const { ruleset, ...request } = input
       let needsAsk = false
 
-      for (const pattern of input.denyPatterns ?? []) {
-        if (evaluate(request.permission, pattern, ruleset, approved).action !== "deny") continue
+      for (const [index, pattern] of (input.denyPatterns ?? []).entries()) {
+        const rule = evaluate(request.permission, pattern, ruleset, approved)
+        if (rule.action !== "deny") continue
+
+        // Canonical grants override spelling defaults, but not path-specific spelling denials.
+        const canonical = request.patterns[index]
+        if (
+          (rule.pattern === "*" || rule.pattern === "**") &&
+          canonical !== undefined &&
+          evaluate(request.permission, canonical, ruleset, approved).action === "allow"
+        )
+          continue
+
         return yield* new PermissionV1.DeniedError({
           ruleset: ruleset.filter((rule) => Wildcard.match(request.permission, rule.permission)),
         })
