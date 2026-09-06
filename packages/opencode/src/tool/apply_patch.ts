@@ -7,6 +7,7 @@ import { InstanceState } from "@/effect/instance-state"
 import { Patch } from "../patch"
 import { createTwoFilesPatch, diffLines } from "diff"
 import { assertExternalDirectoryEffect } from "./external-directory"
+import { editPatterns } from "./permission-path"
 import { trimDiff } from "./edit"
 import { LSP } from "@/lsp/lsp"
 import { FSUtil } from "@opencode-ai/core/fs-util"
@@ -71,7 +72,7 @@ export const ApplyPatchTool = Tool.define(
 
       for (const hunk of hunks) {
         const filePath = path.resolve(instance.directory, hunk.path)
-        yield* assertExternalDirectoryEffect(ctx, filePath)
+        yield* assertExternalDirectoryEffect(ctx, filePath, { fs: afs })
 
         switch (hunk.type) {
           case "add": {
@@ -140,7 +141,7 @@ export const ApplyPatchTool = Tool.define(
             }
 
             const movePath = hunk.move_path ? path.resolve(instance.directory, hunk.move_path) : undefined
-            yield* assertExternalDirectoryEffect(ctx, movePath)
+            yield* assertExternalDirectoryEffect(ctx, movePath, { fs: afs })
 
             fileChanges.push({
               filePath,
@@ -205,7 +206,10 @@ export const ApplyPatchTool = Tool.define(
       const relativePaths = fileChanges.map((c) => path.relative(instance.worktree, c.filePath).replaceAll("\\", "/"))
       yield* ctx.ask({
         permission: "edit",
-        patterns: relativePaths,
+        ...(yield* editPatterns(
+          fileChanges.flatMap((c) => (c.movePath ? [c.filePath, c.movePath] : [c.filePath])),
+          afs,
+        )),
         always: ["*"],
         metadata: {
           filepath: relativePaths.join(", "),
